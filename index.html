@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>星空背景连线</title>
+</head>
+<style>
+	*{
+		margin: 0;
+		padding: 0;
+	}
+	html,body{
+		width: 100%;
+		height: 100%;
+	}
+	body{
+		overflow: hidden;
+	}
+	#canvas{
+		display: block;
+		background: url('bg.jpg') no-repeat center/cover;
+	}
+</style>
+<body>
+	<canvas id="canvas" style="width: 100%;height: 100%;"></canvas>
+	<script>
+		var Canvas={};
+        Canvas.animate={
+        	//初始化
+        	init:function(){
+        		var canvas=document.getElementById('canvas');
+        		this.cxt=canvas.getContext("2d");
+        		canvas.width=window.innerWidth;
+        		canvas.height=window.innerHeight;
+        		this.cw=canvas.width;
+        		this.ch=canvas.height;
+        		this.num=200;
+        		this.data=[];
+        		for(var i=0;i<this.num;i++){
+                    this.data[i]={
+                    	x:Math.random()*this.cw,
+                    	y:Math.random()*this.ch,
+                    	cX:Math.random()*0.6-0.3,
+                    	cY:Math.random()*0.6-0.3
+                    }
+                    this.drawCircle(this.data[i].x,this.data[i].y);
+        		}
+        	},
+        	//绘制线条
+        	drawLine:function(x1,y1,x2,y2){
+                var cxt=this.cxt;
+                var color=cxt.createLinearGradient(x1, y1, x2, y2);
+                color.addColorStop(0, '#fff');
+                color.addColorStop(1, '#001123');
+                cxt.save();
+                cxt.strokeStyle=color;
+                cxt.lineWidth=0.5;
+                cxt.beginPath();
+                cxt.moveTo(x1, y1);
+                cxt.lineTo(x2, y2);
+                cxt.closePath();
+                cxt.stroke();
+                cxt.restore();
+        	},
+        	//绘制粉色小点
+        	drawCircle:function(x,y){
+                var cxt=this.cxt;
+                cxt.save();
+                cxt.fillStyle='pink';
+                cxt.shadowOffsetX = 0; // 阴影Y轴偏移
+                cxt.shadowOffsetY = 0; // 阴影X轴偏移
+                cxt.shadowBlur = 5; // 模糊尺寸
+                cxt.shadowColor = 'rgba(255, 255, 255, 0.6)'; // 颜色
+                cxt.beginPath();
+                cxt.arc(x,y,2,0,Math.PI*2,false);
+                cxt.closePath();
+                cxt.fill();
+                cxt.restore();
+        	},
+        	//粉点运动及连线
+        	moveCircle:function(){
+        		this.cxt.clearRect(0, 0, this.cw, this.ch);
+        		for(var i=0;i<this.num;i++){
+        			this.data[i].x+=this.data[i].cX;
+        			this.data[i].y+=this.data[i].cY;
+        			//边界值判断
+        			if(this.data[i].x>this.cw||this.data[i].x<0){
+        				this.data[i].cX=-this.data[i].cX;
+        			}
+        			if(this.data[i].y>this.ch||this.data[i].y<0){
+        				this.data[i].cY=-this.data[i].cY;
+        			}
+        			this.drawCircle(this.data[i].x,this.data[i].y);
+        			//勾股定理判断是否连线
+        			for(var j=i+1;j<this.num;j++){
+        				if((this.data[i].x-this.data[j].x)*(this.data[i].x-this.data[j].x)+(this.data[i].y-this.data[j].y)*(this.data[i].y-this.data[j].y)<=50*50){
+        					this.drawLine(this.data[i].x,this.data[i].y,this.data[j].x,this.data[j].y);
+        				}
+        			}
+        		}
+        	},
+            //鼠标移动及连线
+            mouseMove:function(event){
+                var e=event||window.event;
+                let ox=e.pageX;
+                let oy=e.pageY;
+                console.log(ox)
+            }
+        }
+        Canvas.animate.init();
+        setInterval(function(){
+            Canvas.animate.moveCircle();
+        },10);
+        
+	</script>
+</body>
+</html>
